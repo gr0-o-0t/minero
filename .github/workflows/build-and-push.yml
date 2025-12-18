@@ -1,0 +1,151 @@
+name: Build and Push Multi-Arch Images
+
+on:
+  release:
+    types: [published]
+  push:
+    tags: ["p2pool-*", "xmrig-*"]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-p2pool:
+    if: startsWith(github.ref_name, 'p2pool-')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse version from tag
+        run: |
+          TAG=${{ github.ref_name }}
+          PREFIX="p2pool-"
+          if [[ $TAG == $PREFIX* ]]; then
+            VERSION=${TAG#$PREFIX}
+            echo "SERVICE_VERSION=$VERSION" >> $GITHUB_ENV
+            SERVICE_NAME="p2pool"
+            echo "SERVICE_NAME_UPPER=${SERVICE_NAME^^}" >> $GITHUB_ENV
+            echo "Parsed version for p2pool: $VERSION"
+          else
+            echo "Tag does not match service p2pool"
+            exit 1
+          fi
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-p2pool
+          tags: |
+            type=raw,value=${{ env.SERVICE_VERSION }}
+            type=raw,value=latest
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./p2pool
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: ${{ env.SERVICE_NAME_UPPER }}_VERSION=${{ env.SERVICE_VERSION }}
+
+
+
+  build-xmrig:
+    if: startsWith(github.ref_name, 'xmrig-')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse version from tag
+        run: |
+          TAG=${{ github.ref_name }}
+          PREFIX="xmrig-"
+          if [[ $TAG == $PREFIX* ]]; then
+            VERSION=${TAG#$PREFIX}
+            echo "SERVICE_VERSION=$VERSION" >> $GITHUB_ENV
+            SERVICE_NAME="xmrig"
+            echo "SERVICE_NAME_UPPER=${SERVICE_NAME^^}" >> $GITHUB_ENV
+            echo "Parsed version for xmrig: $VERSION"
+          else
+            echo "Tag does not match service xmrig"
+            exit 1
+          fi
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-xmrig
+          tags: |
+            type=raw,value=${{ env.SERVICE_VERSION }}
+            type=raw,value=latest
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./xmrig
+          platforms: ${{ matrix.platform }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: ${{ env.SERVICE_NAME_UPPER }}_VERSION=${{ env.SERVICE_VERSION }}
+
+
+
+

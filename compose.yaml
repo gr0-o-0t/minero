@@ -1,0 +1,71 @@
+services:
+  p2pool:
+    image: ghcr.io/gr0-o-0t/minero-p2pool:latest
+    restart: always
+    tty: true
+    stdin_open: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - minero
+    volumes:
+      - p2pool_data:/data:rw
+      - "/dev/hugepages:/dev/hugepages:rw"
+    ports:
+      - 18080:18080
+      - 37888:37888
+    command: >-
+      --mini
+      --loglevel 3
+      --light-mode
+      --host node3.monerodevs.org
+      --rpc-port 18089
+      --zmq-port 18084
+      --wallet 49NmBGozXvREQQokPw32DX7QK95xMFWPEbeLMZQmYUMf9r95kBv2cTeS45DNrLxq8fUPv7ct9rXjxNe4k4Ay65hHEJxoXdG
+
+  xmrig:
+    image: ghcr.io/gr0-o-0t/minero-xmrig:latest
+    restart: always
+    tty: true
+    stdin_open: true
+    privileged: true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          cpus: "0"
+    cap_add:
+      - SYS_NICE
+    depends_on:
+      - p2pool
+    networks:
+      - minero
+    devices:
+      - /dev/cpu:/dev/cpu
+    volumes:
+      - xmrig_data:/data:rw
+      - "./xmrig/config.json:/config.json:rw"
+      - "/dev/hugepages:/dev/hugepages:rw"
+    command: >-
+      --config=/config.json
+      --syslog
+      --pause-on-battery
+      --randomx-mode fast
+      --randomx-1gb-pages
+      --randomx-cache-qos
+      --huge-pages-jit
+      --donate-level 0
+      -o p2pool:3333
+
+networks:
+  minero:
+    external: false
+
+volumes:
+  p2pool_data:
+    external: false
+  xmrig_data:
+    external: false

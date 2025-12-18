@@ -1,0 +1,3 @@
+node3.monerodevs.org
+xmr-pruned.p2pool.uk
+node2.monerodevs.org
