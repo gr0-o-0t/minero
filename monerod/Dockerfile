@@ -1,10 +1,13 @@
+# syntax=docker/dockerfile:1
 FROM alpine:latest
 
+ARG MONERO_VERSION=0.18.4.4
+
 # Upgrade base image
-RUN set -ex && apk --update --no-cache upgrade
+RUN --mount=type=cache,target=/var/cache/apk set -ex && apk --update --no-cache upgrade
 
 # Install all dependencies for static binaries + curl for healthcheck
-RUN set -ex && apk add --update --no-cache \
+RUN --mount=type=cache,target=/var/cache/apk set -ex && apk add --update --no-cache \
   curl \
   jq \
   ca-certificates \
@@ -38,7 +41,7 @@ USER "${MONERO_USER}:${MONERO_USER}"
 
 # Switch to home directory and install newly built monerod binary
 WORKDIR /home/${MONERO_USER}
-COPY --chown=monero:monero --from=ghcr.io/sethforprivacy/simple-monerod /usr/local/bin/monerod /usr/local/bin/monerod
+COPY --chown=monero:monero --from=ghcr.io/sethforprivacy/simple-monerod:v0.18.4.4 /usr/local/bin/monerod /usr/local/bin/monerod
 ADD --chown=monero:monero https://gui.xmr.pm/files/block.txt ./ban_list.txt
 
 EXPOSE 18080 18089

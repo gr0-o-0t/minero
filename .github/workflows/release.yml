@@ -1,0 +1,42 @@
+name: Build & Push Services
+
+on:
+  push:
+    tags:
+      - "p2pool-*"
+      - "xmrig-*"
+      - "monerod-*"
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+
+jobs:
+  p2pool:
+    if: startsWith(github.ref_name, 'p2pool-')
+    uses: ./.github/workflows/docker-build-push.yml
+    secrets: inherit
+    with:
+      service: p2pool
+      tag_prefix: p2pool-
+      context: ./p2pool
+
+  xmrig:
+    if: startsWith(github.ref_name, 'xmrig-')
+    uses: ./.github/workflows/docker-build-push.yml
+    secrets: inherit
+    with:
+      service: xmrig
+      tag_prefix: xmrig-
+      context: ./xmrig
+
+  monerod:
+    if: startsWith(github.ref_name, 'monerod-')
+    uses: ./.github/workflows/docker-build-push.yml
+    secrets: inherit
+    with:
+      service: monerod
+      tag_prefix: monerod-
+      context: ./monerod

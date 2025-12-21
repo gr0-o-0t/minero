@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM alpine:latest AS builder
 
+ARG TARGETARCH
 ARG XMRIG_VERSION=6.24.0
-ARG TARGETARCH=x86_64
 
 # Install build dependencies (following official Alpine build guide)
 RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache \

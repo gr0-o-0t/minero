@@ -2,18 +2,22 @@
 FROM alpine:latest AS builder
 
 # Set architecture argument (x86_64, aarch64, or riscv64)
-ARG TARGETARCH=x86_64
+ARG TARGETARCH
 ARG P2POOL_VERSION=4.13
 
 # Set compiler flags based on architecture
 ARG CFLAGS_ARCH=""
-RUN if [ "$TARGETARCH" = "x86_64" ]; then \
-  export CFLAGS_ARCH="-ffunction-sections"; \
-  elif [ "$TARGETARCH" = "aarch64" ]; then \
-  export CFLAGS_ARCH="-ffunction-sections -mfix-cortex-a53-835769 -mfix-cortex-a53-843419"; \
-  elif [ "$TARGETARCH" = "riscv64" ]; then \
-  export CFLAGS_ARCH="-ffunction-sections"; \
-  fi
+
+RUN case "$TARGETARCH" in \
+  amd64) \
+  export CFLAGS_ARCH="-ffunction-sections" ;; \
+  arm64) \
+  export CFLAGS_ARCH="-ffunction-sections -mfix-cortex-a53-835769 -mfix-cortex-a53-843419" ;; \
+  riscv64) \
+  export CFLAGS_ARCH="-ffunction-sections" ;; \
+  *) \
+  echo "Unsupported TARGETARCH=$TARGETARCH" && exit 1 ;; \
+  esac
 
 # Install build dependencies
 RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache \
