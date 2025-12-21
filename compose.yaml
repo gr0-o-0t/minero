@@ -1,4 +1,47 @@
 services:
+  monerod:
+    image: ghcr.io/gr0-o-0t/minero-monerod:latest
+    user: 1000:1000
+    restart: always
+    tty: true
+    stdin_open: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - minero
+    volumes:
+      - bitmonero:/home/monero/.bitmonero
+      - /dev/hugepages:/dev/hugepages
+    healthcheck:
+      test: curl -s http://127.0.0.1:18081/get_height | jq -e '".synchronized" == true' >/dev/null
+      interval: 3m
+      timeout: 3s
+      retries: 500
+    ports:
+      - 18080:18080
+      - 18089:18089
+    command: >-
+      --rpc-restricted-bind-ip=0.0.0.0
+      --rpc-restricted-bind-port 18089
+      --zmq-pub=tcp://0.0.0.0:18084
+      --confirm-external-bind
+      --restricted-rpc
+      --allow-local-ip
+      --no-igd
+      --fast-block-sync 1
+      --prep-blocks-threads $(nproc)
+      --sync-pruned-blocks
+      --prune-blockchain
+      --check-updates disabled
+      --enforce-dns-checkpointing
+      --enable-dns-blocklist
+      --public-node
+      --in-peers 32
+      --out-peers 32
+      --add-priority-node=p2pmd.xmrvsbeast.com:18080
+      --add-priority-node=nodes.hashvault.pro:18080
+      --ban-list=/home/monero/ban_list.txt
+
   p2pool:
     image: ghcr.io/gr0-o-0t/minero-p2pool:latest
     restart: always
@@ -9,17 +52,19 @@ services:
     networks:
       - minero
     volumes:
-      - p2pool_data:/data:rw
-      - "/dev/hugepages:/dev/hugepages:rw"
+      - p2pool_data:/data
+      - /dev/hugepages:/dev/hugepages
+    depends_on:
+      monerod:
+        condition: service_healthy
     ports:
-      - 18080:18080
       - 37888:37888
     command: >-
       --mini
       --loglevel 3
       --light-mode
-      --host node3.monerodevs.org
-      --rpc-port 18089
+      --host monero
+      --rpc-port 18081
       --zmq-port 18084
       --wallet 49NmBGozXvREQQokPw32DX7QK95xMFWPEbeLMZQmYUMf9r95kBv2cTeS45DNrLxq8fUPv7ct9rXjxNe4k4Ay65hHEJxoXdG
 
@@ -46,9 +91,9 @@ services:
     devices:
       - /dev/cpu:/dev/cpu
     volumes:
-      - xmrig_data:/data:rw
-      - "./xmrig/config.json:/config.json:rw"
-      - "/dev/hugepages:/dev/hugepages:rw"
+      - xmrig_data:/data
+      - ./xmrig/config.json:/config.json
+      - /dev/hugepages:/dev/hugepages
     command: >-
       --config=/config.json
       --syslog
@@ -68,4 +113,6 @@ volumes:
   p2pool_data:
     external: false
   xmrig_data:
+    external: false
+  bitmonero:
     external: false
