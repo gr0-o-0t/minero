@@ -5,18 +5,16 @@ services:
     restart: always
     tty: true
     stdin_open: true
-    security_opt:
-      - no-new-privileges:true
     networks:
       - minero
     volumes:
       - bitmonero:/home/monero/.bitmonero
       - /dev/hugepages:/dev/hugepages
     healthcheck:
-      test: curl -s http://127.0.0.1:18081/get_height | jq -e '".synchronized" == true' >/dev/null
-      interval: 3m
+      test: curl -s http://127.0.0.1:18081/get_info | jq -e '.synchronized == true' >/dev/null
+      interval: 3s
       timeout: 3s
-      retries: 500
+      retries: 50
     ports:
       - 18080:18080
       - 18089:18089
@@ -29,7 +27,6 @@ services:
       --allow-local-ip
       --no-igd
       --fast-block-sync 1
-      --prep-blocks-threads $(nproc)
       --sync-pruned-blocks
       --prune-blockchain
       --check-updates disabled
@@ -63,8 +60,8 @@ services:
       --mini
       --loglevel 3
       --light-mode
-      --host monero
-      --rpc-port 18081
+      --host monerod
+      --rpc-port 18089
       --zmq-port 18084
       --wallet 49NmBGozXvREQQokPw32DX7QK95xMFWPEbeLMZQmYUMf9r95kBv2cTeS45DNrLxq8fUPv7ct9rXjxNe4k4Ay65hHEJxoXdG
 
