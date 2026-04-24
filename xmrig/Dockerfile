@@ -2,7 +2,9 @@
 FROM alpine:latest AS builder
 
 ARG TARGETARCH
-ARG XMRIG_VERSION=6.24.0
+
+# renovate: datasource=github-releases depName=xmrig/xmrig
+ARG XMRIG_VERSION=6.26.0
 
 # Install build dependencies (following official Alpine build guide)
 RUN --mount=type=cache,target=/var/cache/apk apk add --no-cache \

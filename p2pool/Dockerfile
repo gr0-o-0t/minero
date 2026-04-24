@@ -3,7 +3,9 @@ FROM alpine:latest AS builder
 
 # Set architecture argument (x86_64, aarch64, or riscv64)
 ARG TARGETARCH
-ARG P2POOL_VERSION=4.13
+
+# renovate: datasource=github-releases depName=SChernykh/p2pool
+ARG P2POOL_VERSION=4.14
 
 # Set compiler flags based on architecture
 ARG CFLAGS_ARCH=""

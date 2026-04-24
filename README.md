@@ -54,7 +54,7 @@ The repository includes a `compose.yaml` file for easy deployment:
 > The compose file is set up for you to run your own node.
 > Or you can use a public node.
 > Make sure you can trust the node and it supports p2pool (zmq port open).
-> I have included 3 p2pool enabled monero nodes I trust [here](./p2pool/p2pool-hosts.txt).
+> I have included 3 p2pool enabled monero nodes I trust [here](./p2pool/p2pool-monero-nodes.txt).
 > By default p2pool is set up to mine on the mini sidechain in this compose file.
 > You can change this by either removing the `--mini` (port 37888) flag to mine on the main chain (port 37889).
 > Or you can change it to `--nano` (port 37890) to mine on the nano sidechain.
