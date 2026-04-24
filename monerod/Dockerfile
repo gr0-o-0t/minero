@@ -1,8 +1,10 @@
-# syntax=docker/dockerfile:1
-FROM alpine:latest
-
 # renovate: datasource=github-releases depName=monero-project/monero
 ARG MONERO_VERSION=0.18.4.6
+
+FROM ghcr.io/sethforprivacy/simple-monerod:v${MONERO_VERSION} as simple-monerod
+
+# syntax=docker/dockerfile:1
+FROM alpine:latest
 
 # Upgrade base image
 RUN --mount=type=cache,target=/var/cache/apk set -ex && apk --update --no-cache upgrade
@@ -42,7 +44,7 @@ USER "${MONERO_USER}:${MONERO_USER}"
 
 # Switch to home directory and install newly built monerod binary
 WORKDIR /home/${MONERO_USER}
-COPY --chown=monero:monero --from=ghcr.io/sethforprivacy/simple-monerod:v${MONERO_VERSION} /usr/local/bin/monerod /usr/local/bin/monerod
+COPY --chown=monero:monero --from=simple-monerod /usr/local/bin/monerod /usr/local/bin/monerod
 ADD --chown=monero:monero https://gui.xmr.pm/files/block.txt ./ban_list.txt
 
 EXPOSE 18080 18089
