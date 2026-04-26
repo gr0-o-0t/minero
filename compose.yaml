@@ -96,6 +96,8 @@ services:
       - minero
     devices:
       - /dev/cpu:/dev/cpu
+      - /dev/dri:/dev/dri
+      - /dev/kfd:/dev/kfd
     volumes:
       - xmrig_data:/data
       - ./xmrig/config.json:/config.json
