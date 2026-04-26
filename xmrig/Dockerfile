@@ -51,13 +51,12 @@ RUN if [ "$TARGETARCH" = "aarch64" ]; then \
   -DXMRIG_DEPS=scripts/deps \
   -DBUILD_STATIC=ON \
   -DWITH_MSR=ON \
-  -DWITH_SECURE_JIT=ON \
   -DWITH_DMI=ON \
   -DWITH_HWLOC=ON \
   -DWITH_TLS=ON \
   -DWITH_HTTP=ON \
   -DWITH_CUDA=OFF \
-  -DWITH_OPENCL=ON \
+  -DWITH_OPENCL=OFF \
   ${CMAKE_ARCH_OPTS} && \
   make -j $(nproc) && \
   strip -s xmrig && \

@@ -96,8 +96,6 @@ services:
       - minero
     devices:
       - /dev/cpu:/dev/cpu
-      - /dev/dri:/dev/dri
-      - /dev/kfd:/dev/kfd
     volumes:
       - xmrig_data:/data
       - ./xmrig/config.json:/config.json
@@ -110,7 +108,6 @@ services:
       --randomx-1gb-pages
       --randomx-cache-qos
       --huge-pages-jit
-      --opencl
       --donate-level 0
       -o p2pool:3333
 

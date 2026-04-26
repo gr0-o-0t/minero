@@ -19,7 +19,7 @@
         "init-avx2": -1,
         "mode": "fast",
         "1gb-pages": true,
-        "rdmsr": false,
+        "rdmsr": true,
         "wrmsr": true,
         "cache_qos": true,
         "numa": true,
